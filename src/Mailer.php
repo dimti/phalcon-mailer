@@ -56,11 +56,6 @@ class Mailer implements InjectionAwareInterface
      * @var DiInterface
      */
     protected $di;
-    
-    /**
-     * @var string
-     */
-    protected $queueName;
 
     /**
      * Create a new Mailer instance
@@ -108,12 +103,12 @@ class Mailer implements InjectionAwareInterface
      *
      * @return int
      */
-    public function send($view, array $data, $callback)
+    public function sendView($view, array $data, $callback)
     {
         // First we need to parse the view, which could either be a string or an array
         // containing both an HTML and plain text versions of the view which should
         // be used when sending an e-mail. We will extract both of them out here.
-        list($view, $plain) = $this->parseView($view);
+        list($htmlView, $plainView) = $this->parseView($view);
 
         $data['message'] = $message = $this->createMessage();
 
@@ -122,7 +117,12 @@ class Mailer implements InjectionAwareInterface
         // Once we have retrieved the view content for the e-mail we will set the body
         // of this message using the HTML type, which will provide a simple wrapper
         // to creating view based emails that are able to receive arrays of data.
-        $this->addContent($message, $view, $plain, $data);
+        
+        if (isset($htmlView))
+            $message->setBody($this->render($htmlView, $data), 'text/html');
+
+        if (isset($plainView))
+            $message->addPart($this->render($plainView, $data), 'text/plain');
 
         $message = $message->getSwiftMessage();
 
@@ -130,22 +130,30 @@ class Mailer implements InjectionAwareInterface
     }
 
     /**
-     * Add the content to a given message
+     * Send a new message using a ready body
      *
-     * @param Message $message
-     * @param string  $view
-     * @param string  $plain
-     * @param array   $data
+     * @param string|array   $body
+     * @param Closure|string $callback
+     *
+     * @return int
      */
-    protected function addContent(Message $message, $view, $plain, $data)
+    public function send($body, $callback)
     {
-        if (isset($view)) {
-            $message->setBody($this->render($view, $data), 'text/html');
-        }
+        list($html, $plain) = $this->parseView($body);
 
-        if (isset($plain)) {
-            $message->addPart($this->render($plain, $data), 'text/plain');
-        }
+        $message = $this->createMessage();
+
+        $this->callMessageBuilder($callback, $message);
+        
+        if (isset($html))
+            $message->setBody($html, 'text/html');
+
+        if (isset($plain))
+            $message->addPart($plain, 'text/plain');
+
+        $message = $message->getSwiftMessage();
+
+        return $this->sendSwiftMessage($message);
     }
 
     /**
