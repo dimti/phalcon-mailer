@@ -32,7 +32,7 @@ class Mailer implements InjectionAwareInterface
     protected $swift;
 
     /**
-     * The global from eamil and name
+     * The global from email and name
      *
      * @var array
      */
@@ -56,6 +56,11 @@ class Mailer implements InjectionAwareInterface
      * @var DiInterface
      */
     protected $di;
+    
+    /**
+     * @var string
+     */
+    protected $queueName;
 
     /**
      * Create a new Mailer instance
@@ -70,14 +75,14 @@ class Mailer implements InjectionAwareInterface
     }
 
     /**
-     * Set the global from eamil and name
+     * Set the global from email and name
      *
-     * @param string $eamil
+     * @param string $email
      * @param string $name
      */
-    public function alwaysFrom($eamil, $name = null)
+    public function alwaysFrom($email, $name = null)
     {
-        $this->from = compact('eamil', 'name');
+        $this->from = compact('email', 'name');
     }
 
     /**
@@ -213,11 +218,11 @@ class Mailer implements InjectionAwareInterface
     {
         $message = new Message(new Swift_Message);
 
-        // If a global from eamil has been specified we will set it on every message
+        // If a global from email has been specified we will set it on every message
         // instances so the developer does not have to repeat themselves every time
-        // they create a new message. We will just go ahead and push the eamil.
-        if (isset($this->from['eamil'])) {
-            $message->from($this->from['eamil'], $this->from['name']);
+        // they create a new message. We will just go ahead and push the email.
+        if (isset($this->from['email'])) {
+            $message->from($this->from['email'], $this->from['name']);
         }
 
         return $message;
@@ -325,8 +330,6 @@ class Mailer implements InjectionAwareInterface
     public function queue($view, array $data, $callback)
     {
         $callback = $this->buildQueueCallable($callback);
-
-        $this->queue->choose('mailer');
 
         return $this->queue->put(json_encode([
             'job' => 'mailer:handleQueuedMessage',
