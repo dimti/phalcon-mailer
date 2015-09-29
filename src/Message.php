@@ -12,7 +12,7 @@ use Swift_Attachment;
  * @package Vanchelo\Mailer
  *
  * @method Swift_Message setBody($body, $contentType = null, $charset = null)
- * @method Swift_Message setFrom($addresses, $name = null)
+ * @method Swift_Message setFrom($emails, $name = null)
  * @method Swift_Message addPart($body, $contentType = null, $charset = null)
  */
 class Message
@@ -35,16 +35,16 @@ class Message
     }
 
     /**
-     * Add a "from" address to the message.
+     * Add a "from" email to the message.
      *
-     * @param string $address
+     * @param string $email
      * @param string $name
      *
      * @return Message
      */
-    public function from($address, $name = null)
+    public function from($email, $name = null)
     {
-        $this->swift->setFrom($address, $name);
+        $this->swift->setFrom($email, $name);
 
         return $this;
     }
@@ -52,14 +52,14 @@ class Message
     /**
      * Set the "sender" of the message.
      *
-     * @param string $address
+     * @param string $email
      * @param string $name
      *
      * @return Message
      */
-    public function sender($address, $name = null)
+    public function sender($email, $name = null)
     {
-        $this->swift->setSender($address, $name);
+        $this->swift->setSender($email, $name);
 
         return $this;
     }
@@ -67,13 +67,13 @@ class Message
     /**
      * Set the "return path" of the message.
      *
-     * @param string $address
+     * @param string $email
      *
      * @return Message
      */
-    public function returnPath($address)
+    public function returnPath($email)
     {
-        $this->swift->setReturnPath($address);
+        $this->swift->setReturnPath($email);
 
         return $this;
     }
@@ -81,70 +81,70 @@ class Message
     /**
      * Add a recipient to the message.
      *
-     * @param string|array $address
+     * @param string|array $email
      * @param string       $name
      *
      * @return Message
      */
-    public function to($address, $name = null)
+    public function to($email, $name = null)
     {
-        return $this->addAddresses($address, $name, 'To');
+        return $this->addEmails($email, $name, 'To');
     }
 
     /**
      * Add a carbon copy to the message.
      *
-     * @param string $address
+     * @param string $email
      * @param string $name
      *
      * @return Message
      */
-    public function cc($address, $name = null)
+    public function cc($email, $name = null)
     {
-        return $this->addAddresses($address, $name, 'Cc');
+        return $this->addEmails($email, $name, 'Cc');
     }
 
     /**
      * Add a blind carbon copy to the message.
      *
-     * @param string $address
+     * @param string $email
      * @param string $name
      *
      * @return Message
      */
-    public function bcc($address, $name = null)
+    public function bcc($email, $name = null)
     {
-        return $this->addAddresses($address, $name, 'Bcc');
+        return $this->addEmails($email, $name, 'Bcc');
     }
 
     /**
-     * Add a reply to address to the message.
+     * Add a reply to email to the message.
      *
-     * @param string $address
+     * @param string $email
      * @param string $name
      *
      * @return Message
      */
-    public function replyTo($address, $name = null)
+    public function replyTo($email, $name = null)
     {
-        return $this->addAddresses($address, $name, 'ReplyTo');
+        return $this->addEmails($email, $name, 'ReplyTo');
     }
 
     /**
      * Add a recipient to the message.
      *
-     * @param string|array $address
+     * @param string|array $email
      * @param string       $name
      * @param string       $type
      *
      * @return Message
      */
-    protected function addAddresses($address, $name, $type)
+    protected function addEmails($email, $name, $type)
     {
-        if (is_array($address)) {
-            $this->swift->{"set{$type}"}($address, $name);
+        if (is_array($email)) {
+            $this->swift->{"set{$type}"}($email, $name);
         } else {
-            $this->swift->{"add{$type}"}($address, $name);
+            $this->swift->{"add{$type}"}($email, $name);
         }
 
         return $this;

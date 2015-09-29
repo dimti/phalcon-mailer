@@ -32,7 +32,7 @@ class Mailer implements InjectionAwareInterface
     protected $swift;
 
     /**
-     * The global from address and name
+     * The global from eamil and name
      *
      * @var array
      */
@@ -70,14 +70,14 @@ class Mailer implements InjectionAwareInterface
     }
 
     /**
-     * Set the global from address and name
+     * Set the global from eamil and name
      *
-     * @param string $address
+     * @param string $eamil
      * @param string $name
      */
-    public function alwaysFrom($address, $name = null)
+    public function alwaysFrom($eamil, $name = null)
     {
-        $this->from = compact('address', 'name');
+        $this->from = compact('eamil', 'name');
     }
 
     /**
@@ -213,11 +213,11 @@ class Mailer implements InjectionAwareInterface
     {
         $message = new Message(new Swift_Message);
 
-        // If a global from address has been specified we will set it on every message
+        // If a global from eamil has been specified we will set it on every message
         // instances so the developer does not have to repeat themselves every time
-        // they create a new message. We will just go ahead and push the address.
-        if (isset($this->from['address'])) {
-            $message->from($this->from['address'], $this->from['name']);
+        // they create a new message. We will just go ahead and push the eamil.
+        if (isset($this->from['eamil'])) {
+            $message->from($this->from['eamil'], $this->from['name']);
         }
 
         return $message;

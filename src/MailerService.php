@@ -54,8 +54,8 @@ class MailerService extends Component
 
         $from = $this->config['from'];
 
-        if (is_array($from) && isset($from['address'])) {
-            $mailer->alwaysFrom($from['address'], $from['name']);
+        if (is_array($from) && isset($from['eamil'])) {
+            $mailer->alwaysFrom($from['eamil'], $from['name']);
         }
 
         return $mailer;
