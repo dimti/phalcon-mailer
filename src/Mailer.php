@@ -39,13 +39,6 @@ class Mailer implements InjectionAwareInterface
     protected $from;
 
     /**
-     * Array of failed recipients
-     *
-     * @var array
-     */
-    protected $failedRecipients = [];
-
-    /**
      * The Benastalk queue instance
      *
      * @var \Phalcon\Queue\Beanstalk
@@ -78,20 +71,6 @@ class Mailer implements InjectionAwareInterface
     public function alwaysFrom($email, $name = null)
     {
         $this->from = compact('email', 'name');
-    }
-
-    /**
-     * Send a new message when only a plain part
-     *
-     * @param string $view
-     * @param array  $data
-     * @param mixed  $callback
-     *
-     * @return int
-     */
-    public function plain($view, array $data, $callback)
-    {
-        return $this->send(['text' => $view], $data, $callback);
     }
 
     /**
@@ -333,7 +312,7 @@ class Mailer implements InjectionAwareInterface
     }
 
     /**
-     * Queue a new e-mail message for sending
+     * Queue a new e-mail message for sending with view
      *
      * @param string|array    $view
      * @param array           $data
@@ -375,16 +354,6 @@ class Mailer implements InjectionAwareInterface
                 'callback' => $callback,
             ],
         ]));
-    }
-
-    /**
-     * Get the array of failed recipients
-     *
-     * @return array
-     */
-    public function failures()
-    {
-        return $this->failedRecipients;
     }
 
     /**
