@@ -305,7 +305,13 @@ class Mailer implements InjectionAwareInterface
      */
     public function handleQueuedMessage($job, $data)
     {
-        $this->send($data['view'], $data['data'], $this->getQueuedCallable($data));
+	    $callable = $this->getQueuedCallable($data);
+	    
+	    // if set key "view", it will use views, else ready body
+	    if (isset($data['view']))
+	        $this->sendView($data['view'], $data['data'], $callable);
+		else
+	        $this->send($data['body'], $callable);
 
         $job->delete();
     }
@@ -335,7 +341,7 @@ class Mailer implements InjectionAwareInterface
      *
      * @return mixed
      */
-    public function queue($view, array $data, $callback)
+    public function queueView($view, array $data, $callback)
     {
         $callback = $this->buildQueueCallable($callback);
 
@@ -344,6 +350,28 @@ class Mailer implements InjectionAwareInterface
             'data' => [
                 'view' => $view,
                 'data' => $data,
+                'callback' => $callback,
+            ],
+        ]));
+    }
+
+    /**
+     * Queue a new e-mail message for sending
+     *
+     * @param string|array    $view
+     * @param array           $data
+     * @param \Closure|string $callback
+     *
+     * @return mixed
+     */
+    public function queue($body, $callback)
+    {
+        $callback = $this->buildQueueCallable($callback);
+
+        return $this->queue->put(json_encode([
+            'job' => 'mailer:handleQueuedMessage',
+            'data' => [
+                'body' => $body,
                 'callback' => $callback,
             ],
         ]));
