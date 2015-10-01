@@ -1,13 +1,17 @@
 {
-    "name": "vanchelo/phalcon-mailer",
+    "name": "slowprog/phalcon-mailer",
     "type": "library",
     "description": "Phalcon Mailer Service",
     "keywords": ["mail","mailer","phalcon"],
-    "homepage": "https://github.com/vanchelo/phalcon-mailer",
+    "homepage": "https://github.com/SlowProg/phalcon-mailer",
     "license": "GPLv2",
     "authors": [
         {
             "name": "Brezhnev Ivan"
+        },
+        {
+            "name": "Andrey Tyshev",
+            "email": "slowprog@gmail.com"
         }
     ],
     "require": {
@@ -20,7 +24,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Vanchelo\\Mailer\\": "src/"
+            "SlowProg\\Mailer\\": "src/"
         },
         "files": [
             "src/helpers.php"

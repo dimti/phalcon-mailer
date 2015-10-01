@@ -1,6 +1,6 @@
 <?php
 
-namespace Vanchelo\Mailer;
+namespace SlowProg\Mailer;
 
 use Swift_Image;
 use Swift_Message;
@@ -9,7 +9,7 @@ use Swift_Attachment;
 /**
  * Class Message
  *
- * @package Vanchelo\Mailer
+ * @package SlowProg\Mailer
  *
  * @method Swift_Message setBody($body, $contentType = null, $charset = null)
  * @method Swift_Message setFrom($emails, $name = null)

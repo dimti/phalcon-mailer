@@ -1,6 +1,6 @@
 <?php
 
-namespace Vanchelo\Mailer;
+namespace SlowProg\Mailer;
 
 use Phalcon\Mvc\User\Component;
 use Swift_Mailer;
@@ -12,7 +12,7 @@ use Phalcon\Mvc\View\Simple as SimpleView;
 /**
  * Class MailerService
  *
- * @package Vanchelo\Mailer
+ * @package SlowProg\Mailer
  */
 class MailerService extends Component
 {

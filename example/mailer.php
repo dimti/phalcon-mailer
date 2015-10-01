@@ -3,7 +3,7 @@
 use Phalcon\Queue\Beanstalk;
 use Phalcon\Queue\Beanstalk\Job;
 use Phalcon\DI;
-use Vanchelo\Mailer\MailerService;
+use SlowProg\Mailer\MailerService;
 
 // Подключаем конфиг приложения (исправить на свой)
 $config = require __DIR__ . '/app/config/config.php';

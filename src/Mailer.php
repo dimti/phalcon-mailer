@@ -1,6 +1,6 @@
 <?php
 
-namespace Vanchelo\Mailer;
+namespace SlowProg\Mailer;
 
 use Closure;
 use Phalcon\DiInterface;
@@ -13,7 +13,7 @@ use Phalcon\Queue\Beanstalk;
 /**
  * Class Mailer
  *
- * @package Vanchelo\Mailer
+ * @package SlowProg\Mailer
  */
 class Mailer implements InjectionAwareInterface
 {
