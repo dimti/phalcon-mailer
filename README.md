@@ -9,17 +9,17 @@ C помощью `composer`:
 
 Добавить в файл `composer.json` в секцию `require` следующую строку:
 ```
-"vanchelo/phalcon-mailer": "~2.0"
+"slowprog/phalcon-mailer": "~2.0"
 ```
 или выполнить в командной строке:
 ```
-composer require vanchelo/phalcon-mailer
+composer require slowprog/phalcon-mailer
 ```
 Должно получится примерно так:
 ```json
 {
   "require": {
-    "vanchelo/phalcon-console": "dev-master"
+    "slowprog/phalcon-console": "dev-master"
   }
 }
 ```
@@ -71,7 +71,7 @@ $this->di['mailer'] = function() {
 ---------
 Пример для контроллера, но работать будет не только в контроллерах
 ```php
-$this->mailer->send('emails/xxx', [
+$this->mailer->sendView('emails/xxx', [
     'test' => 'test' // Переменные для передачи в шаблон
 ], function($message) {
     $message->to('some_email@email.com');
@@ -129,7 +129,7 @@ $this->di['queue'] = function () {
 Пример отложенной отправки почты
 
 ```php
-$this->mailer->queue('emails/xxx', [
+$this->mailer->queueView('emails/xxx', [
     'test' => 'test' // Переменные для передачи в шаблон
 ], function($message) {
     $message->to('some_email@email.com');
@@ -139,4 +139,4 @@ $this->mailer->queue('emails/xxx', [
 
 Вся отложенная почта помещается в очередь `mailer` (не знаю насколько это правильно)
 
-Пример обработчика очереди https://github.com/vanchelo/phalcon-mailer/blob/master/example/mailer.php
+Пример обработчика очереди https://github.com/slowprog/phalcon-mailer/blob/master/example/mailer.php
