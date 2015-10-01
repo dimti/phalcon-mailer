@@ -36,6 +36,32 @@ $this->di['mailer'] = function() {
     return $service->mailer();
 };
 ```
+или с передачей параметров на этапе инициализации сервиса
+
+```php
+/**
+ * Register Mailer Service
+ */
+$this->di['mailer'] = function() {
+    $service = new MailerService([
+        'driver' => 'smtp', // mail, sendmail, smtp
+        'host'   => 'smtp.email.com',
+        'port'   => 587,
+        'from'   => [
+            'address' => 'no-reply@my-domain.com',
+            'name'    => 'My Cool Company',
+        ],
+        'encryption' => 'tls',
+        'username'   => 'no-reply@my-domain.com',
+        'password'   => 'some-strong-password',
+        'sendmail'   => '/usr/sbin/sendmail -bs',
+        // Путь используемый для поиска шаблонов писем
+        'viewsDir'   => __DIR__ . '/../app/views/', // optional
+    ]);
+
+    return $service->mailer();
+};
+```
 
 Отправка письма
 ---------
@@ -57,27 +83,23 @@ $this->mailer->send('emails/xxx', [
 Настройки по умолчанию необходимо прописать в конфигурационном файле вашего приложения config/config.php
 ```php
 <?php
-return new \Phalcon\Config(array(
-    'application' => array(
-        // Путь используемый для поиска шаблонов писем
-        'viewsDir'  => __DIR__ . '/../app/views/',
-        /* ... */
-    ),
-
-    'mail' => array(
+return new \Phalcon\Config([
+    'mail' => [
         'driver' => 'smtp', // mail, sendmail, smtp
         'host'   => 'smtp.email.com',
         'port'   => 587,
-        'from'   => array(
+        'from'   => [
             'address' => 'no-reply@my-domain.com',
             'name'    => 'My Cool Company'
-        ),
+        ],
         'encryption' => 'tls',
         'username'   => 'no-reply@my-domain.com',
         'password'   => 'some-strong-password',
         'sendmail'   => '/usr/sbin/sendmail -bs',
-    ),
-));
+        // Путь используемый для поиска шаблонов писем
+        'viewsDir'   => __DIR__ . '/../app/views/', // optional
+    ],
+]);
 ```
 
 Если будет необходимость, настройки почты можно вынести в отдельный конфигурационный файл
