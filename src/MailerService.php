@@ -20,19 +20,22 @@ class MailerService extends Component
      * @var array
      */
     protected $config;
+    
+    /**
+     * @var string
+     */
+    protected $queueName;
 
     /**
      * Create a new service provider instance.
      *
      * @param array $config
+     * @param array $queueName
      */
-    public function __construct(array $config = [])
+    public function __construct(array $config, $queueName = 'emails')
     {
-        if (!$config && !$this->di->has('config')) {
-            throw new \RuntimeException('Correct config for Mailer is not provided!');
-        }
-
-        $this->config = $config ?: $this->di['config']->mail->toArray();
+        $this->config = $config;
+        $this->queueName = $queueName;
 
         $this->registerSwiftMailer();
         $this->registerView();
@@ -54,8 +57,8 @@ class MailerService extends Component
 
         $from = $this->config['from'];
 
-        if (is_array($from) && isset($from['address'])) {
-            $mailer->alwaysFrom($from['address'], $from['name']);
+        if (is_array($from) && isset($from['email'])) {
+            $mailer->alwaysFrom($from['email'], $from['name']);
         }
 
         return $mailer;
@@ -196,7 +199,9 @@ class MailerService extends Component
         $mailer->setDI($this->di);
 
         if ($this->di->has('queue')) {
-            $mailer->setQueue($this->di['queue']);
+	        $queue = $this->di['queue'];
+	        $queue->choose($this->queueName);
+            $mailer->setQueue($queue);
         }
     }
 }

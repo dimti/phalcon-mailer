@@ -52,7 +52,7 @@ $this->di['mailer'] = function() {
         'host'   => 'smtp.email.com',
         'port'   => 587,
         'from'   => [
-            'address' => 'no-reply@my-domain.com',
+            'email' => 'no-reply@my-domain.com',
             'name'    => 'My Cool Company',
         ],
         'encryption' => 'tls',
@@ -93,7 +93,7 @@ return new \Phalcon\Config([
         'host'   => 'smtp.email.com',
         'port'   => 587,
         'from'   => [
-            'address' => 'no-reply@my-domain.com',
+            'email' => 'no-reply@my-domain.com',
             'name'    => 'My Cool Company'
         ],
         'encryption' => 'tls',
