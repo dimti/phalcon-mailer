@@ -1,6 +1,6 @@
 Phalcon Mailer
 ==============
-Удобная библиотека для отправки Вашей почты в [Phalcon](http://phalconphp.com/).
+Удобная библиотека для отправки Вашей почты в [Phalcon 2.0](http://phalconphp.com/).
 
 Код заимствован из Laravel 4 и адаптирован под Phalcon.
 
@@ -9,7 +9,11 @@ C помощью `composer`:
 
 Добавить в файл `composer.json` в секцию `require` следующую строку:
 ```
-"vanchelo/phalcon-mailer": "dev-master"
+"vanchelo/phalcon-mailer": "~2.0"
+```
+или выполнить в командной строке:
+```
+composer require vanchelo/phalcon-mailer
 ```
 Должно получится примерно так:
 ```json
@@ -48,7 +52,7 @@ $this->di['mailer'] = function() {
         'host'   => 'smtp.email.com',
         'port'   => 587,
         'from'   => [
-            'address' => 'no-reply@my-domain.com',
+            'email' => 'no-reply@my-domain.com',
             'name'    => 'My Cool Company',
         ],
         'encryption' => 'tls',
@@ -89,7 +93,7 @@ return new \Phalcon\Config([
         'host'   => 'smtp.email.com',
         'port'   => 587,
         'from'   => [
-            'address' => 'no-reply@my-domain.com',
+            'email' => 'no-reply@my-domain.com',
             'name'    => 'My Cool Company'
         ],
         'encryption' => 'tls',

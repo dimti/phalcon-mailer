@@ -32,18 +32,11 @@ class Mailer implements InjectionAwareInterface
     protected $swift;
 
     /**
-     * The global from address and name
+     * The global from email and name
      *
      * @var array
      */
     protected $from;
-
-    /**
-     * Array of failed recipients
-     *
-     * @var array
-     */
-    protected $failedRecipients = [];
 
     /**
      * The Benastalk queue instance
@@ -70,31 +63,6 @@ class Mailer implements InjectionAwareInterface
     }
 
     /**
-     * Set the global from address and name
-     *
-     * @param string $address
-     * @param string $name
-     */
-    public function alwaysFrom($address, $name = null)
-    {
-        $this->from = compact('address', 'name');
-    }
-
-    /**
-     * Send a new message when only a plain part
-     *
-     * @param string $view
-     * @param array  $data
-     * @param mixed  $callback
-     *
-     * @return int
-     */
-    public function plain($view, array $data, $callback)
-    {
-        return $this->send(['text' => $view], $data, $callback);
-    }
-
-    /**
      * Send a new message using a view
      *
      * @param string|array   $view
@@ -103,44 +71,90 @@ class Mailer implements InjectionAwareInterface
      *
      * @return int
      */
-    public function send($view, array $data, $callback)
+    public function sendView($view, array $data, $callback)
     {
+        return $this->send($this->viewToBody($view, $data), $callback);
+    }
+
+    /**
+     * Send a new message using a ready body
+     *
+     * @param string|array   $body
+     * @param Closure|string $callback
+     *
+     * @return int
+     */
+    public function send($body, $callback)
+    {
+        $message = $this->createMessage($body, $callback);
+
+        return $this->sendSwiftMessage($message->getSwiftMessage());
+    }
+
+    /**
+     * Queue a new e-mail message for sending with view
+     *
+     * @param string|array    $view
+     * @param array           $data
+     * @param \Closure|string $callback
+     * @param boolean         $render
+     *
+     * @return mixed
+     */
+    public function queueView($view, array $data, $callback)
+    {
+		$message = $this->createMessage($this->viewToBody($view, $data), $callback);
+		
+        return $this->queue->put(json_encode([
+            'message' => serialize($message->getSwiftMessage()),
+        ]));
+    }
+
+    /**
+     * Queue a new e-mail message for sending
+     *
+     * @param string|array    $body
+     * @param \Closure|string $callback
+     *
+     * @return mixed
+     */
+    public function queue($body, $callback)
+    {
+		$message = $this->createMessage($body, $callback);
+        
+        return $this->queue->put(json_encode([
+            'message' => serialize($message->getSwiftMessage()),
+        ]));
+    }
+
+    /**
+     * Render view to ready body for sending
+     *
+     * @param string|array   $view
+     * @param array          $data
+     *
+     * @return array
+     */
+    public function viewToBody($view, array $data)
+    {
+	    $result = [];
+	    
         // First we need to parse the view, which could either be a string or an array
         // containing both an HTML and plain text versions of the view which should
         // be used when sending an e-mail. We will extract both of them out here.
-        list($view, $plain) = $this->parseView($view);
-
-        $data['message'] = $message = $this->createMessage();
-
-        $this->callMessageBuilder($callback, $message);
+        list($htmlView, $plainView) = $this->parseView($view);
 
         // Once we have retrieved the view content for the e-mail we will set the body
         // of this message using the HTML type, which will provide a simple wrapper
         // to creating view based emails that are able to receive arrays of data.
-        $this->addContent($message, $view, $plain, $data);
+        
+        if (isset($htmlView))
+            $result['html'] = $this->render($htmlView, $data);
 
-        $message = $message->getSwiftMessage();
+        if (isset($plainView))
+            $result['plain'] = $this->render($plainView, $data);
 
-        return $this->sendSwiftMessage($message);
-    }
-
-    /**
-     * Add the content to a given message
-     *
-     * @param Message $message
-     * @param string  $view
-     * @param string  $plain
-     * @param array   $data
-     */
-    protected function addContent(Message $message, $view, $plain, $data)
-    {
-        if (isset($view)) {
-            $message->setBody($this->render($view, $data), 'text/html');
-        }
-
-        if (isset($plain)) {
-            $message->addPart($this->render($plain, $data), 'text/plain');
-        }
+        return $result;
     }
 
     /**
@@ -207,19 +221,32 @@ class Mailer implements InjectionAwareInterface
     /**
      * Create a new message instance
      *
+     * @param string|array   $body
+     * @param Closure|string $callback
+     *
      * @return Message
      */
-    protected function createMessage()
+    protected function createMessage($body, $callback)
     {
         $message = new Message(new Swift_Message);
 
-        // If a global from address has been specified we will set it on every message
+        // If a global from email has been specified we will set it on every message
         // instances so the developer does not have to repeat themselves every time
-        // they create a new message. We will just go ahead and push the address.
-        if (isset($this->from['address'])) {
-            $message->from($this->from['address'], $this->from['name']);
+        // they create a new message. We will just go ahead and push the email.
+        if (isset($this->from['email'])) {
+            $message->from($this->from['email'], $this->from['name']);
         }
+		
+		$this->callMessageBuilder($callback, $message);
+        
+        list($html, $plain) = $this->parseView($body);
+        
+        if (isset($html))
+            $message->setBody($html, 'text/html');
 
+        if (isset($plain))
+            $message->addPart($plain, 'text/plain');
+            
         return $message;
     }
 
@@ -271,84 +298,6 @@ class Mailer implements InjectionAwareInterface
     }
 
     /**
-     * Build the callable for a queued e-mail job
-     *
-     * @param mixed $callback
-     *
-     * @return mixed
-     */
-    protected function buildQueueCallable($callback)
-    {
-        if (!$callback instanceof Closure) return $callback;
-
-        return serialize(new SerializableClosure($callback));
-    }
-
-    /**
-     * Handle a queued e-mail message job
-     *
-     * @param \Phalcon\Queue\Beanstalk\Job $job
-     * @param array                        $data
-     */
-    public function handleQueuedMessage($job, $data)
-    {
-        $this->send($data['view'], $data['data'], $this->getQueuedCallable($data));
-
-        $job->delete();
-    }
-
-    /**
-     * Get the true callable for a queued e-mail message
-     *
-     * @param array $data
-     *
-     * @return mixed
-     */
-    protected function getQueuedCallable(array $data)
-    {
-        if (str_contains($data['callback'], 'SerializableClosure')) {
-            return with(unserialize($data['callback']))->getClosure();
-        }
-
-        return $data['callback'];
-    }
-
-    /**
-     * Queue a new e-mail message for sending
-     *
-     * @param string|array    $view
-     * @param array           $data
-     * @param \Closure|string $callback
-     *
-     * @return mixed
-     */
-    public function queue($view, array $data, $callback)
-    {
-        $callback = $this->buildQueueCallable($callback);
-
-        $this->queue->choose('mailer');
-
-        return $this->queue->put(json_encode([
-            'job' => 'mailer:handleQueuedMessage',
-            'data' => [
-                'view' => $view,
-                'data' => $data,
-                'callback' => $callback,
-            ],
-        ]));
-    }
-
-    /**
-     * Get the array of failed recipients
-     *
-     * @return array
-     */
-    public function failures()
-    {
-        return $this->failedRecipients;
-    }
-
-    /**
      * Set the Beanstalk queue instance
      *
      * @param \Phalcon\Queue\Beanstalk $queue
@@ -360,6 +309,37 @@ class Mailer implements InjectionAwareInterface
         $this->queue = $queue;
 
         return $this;
+    }
+
+    /**
+     * Handle queue piecemeal for periodic launch with cron 
+     *
+     * @param integer $limit
+     */
+    public function handleQueue($limit = 50)
+    {
+		while ((is_null($limit) || --$limit >= 0) && ($job = $this->queue->peekReady()) !== false) {
+			
+		    $data = json_decode($job->getBody(), true);
+// 		    $segments = explode(':', $data['job']);
+
+// 		    if (count($segments) !== 2) continue;
+		    
+		    call_user_func_array([$this, 'sendSwiftMessage'], [unserialize($data['message'])]);
+		    
+		    $job->delete();
+		}
+    }
+
+    /**
+     * Set the global from email and name
+     *
+     * @param string $email
+     * @param string $name
+     */
+    public function alwaysFrom($email, $name = null)
+    {
+        $this->from = compact('email', 'name');
     }
 
     /**
