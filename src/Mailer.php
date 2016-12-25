@@ -6,7 +6,6 @@ use Closure;
 use Phalcon\DiInterface;
 use Swift_Mailer;
 use Swift_Message;
-use Jeremeamia\SuperClosure\SerializableClosure;
 use Phalcon\DI\InjectionAwareInterface;
 use Phalcon\Queue\Beanstalk;
 
@@ -104,7 +103,7 @@ class Mailer implements InjectionAwareInterface
     public function queueView($view, array $data, $callback)
     {
 		$message = $this->createMessage($this->viewToBody($view, $data), $callback);
-		
+
         return $this->queue->put(json_encode([
             'message' => serialize($message->getSwiftMessage()),
         ]));
@@ -121,7 +120,7 @@ class Mailer implements InjectionAwareInterface
     public function queue($body, $callback)
     {
 		$message = $this->createMessage($body, $callback);
-        
+
         return $this->queue->put(json_encode([
             'message' => serialize($message->getSwiftMessage()),
         ]));
@@ -138,7 +137,7 @@ class Mailer implements InjectionAwareInterface
     public function viewToBody($view, array $data)
     {
 	    $result = [];
-	    
+
         // First we need to parse the view, which could either be a string or an array
         // containing both an HTML and plain text versions of the view which should
         // be used when sending an e-mail. We will extract both of them out here.
@@ -147,7 +146,7 @@ class Mailer implements InjectionAwareInterface
         // Once we have retrieved the view content for the e-mail we will set the body
         // of this message using the HTML type, which will provide a simple wrapper
         // to creating view based emails that are able to receive arrays of data.
-        
+
         if (isset($htmlView))
             $result['html'] = $this->render($htmlView, $data);
 
@@ -236,17 +235,17 @@ class Mailer implements InjectionAwareInterface
         if (isset($this->from['email'])) {
             $message->from($this->from['email'], $this->from['name']);
         }
-		
+
 		$this->callMessageBuilder($callback, $message);
-        
+
         list($html, $plain) = $this->parseView($body);
-        
+
         if (isset($html))
             $message->setBody($html, 'text/html');
 
         if (isset($plain))
             $message->addPart($plain, 'text/plain');
-            
+
         return $message;
     }
 
@@ -312,21 +311,21 @@ class Mailer implements InjectionAwareInterface
     }
 
     /**
-     * Handle queue piecemeal for periodic launch with cron 
+     * Handle queue piecemeal for periodic launch with cron
      *
      * @param integer $limit
      */
     public function handleQueue($limit = 50)
     {
 		while ((is_null($limit) || --$limit >= 0) && ($job = $this->queue->peekReady()) !== false) {
-			
+
 		    $data = json_decode($job->getBody(), true);
 // 		    $segments = explode(':', $data['job']);
 
 // 		    if (count($segments) !== 2) continue;
-		    
+
 		    call_user_func_array([$this, 'sendSwiftMessage'], [unserialize($data['message'])]);
-		    
+
 		    $job->delete();
 		}
     }
