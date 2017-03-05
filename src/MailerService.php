@@ -20,7 +20,7 @@ class MailerService extends Component
      * @var array
      */
     protected $config;
-    
+
     /**
      * @var string
      */
@@ -34,6 +34,7 @@ class MailerService extends Component
      */
     public function __construct(array $config, $queueName = 'emails')
     {
+
         $this->config = $config;
         $this->queueName = $queueName;
 
@@ -75,7 +76,7 @@ class MailerService extends Component
         // mailer instance, passing in the transport instances, which allows us to
         // override this transporter instances during app start-up if necessary.
         $this->di['swift.mailer'] = function () {
-            return new Swift_Mailer($this->di['swift.transport']);
+            return new Swift_Mailer($this->get('swift.transport'));
         };
     }
 
@@ -172,17 +173,18 @@ class MailerService extends Component
     {
         if ($this->di->has('view')) {
             $this->di['mailer.view'] = function () {
-                return $this->di->get('view');
+                return $this->get('view');
             };
         } else {
-            $this->di['mailer.view'] = function () {
-                if (!isset($this->config['viewsDir'])) {
+            $viewsDir = isset($this->config['viewsDir']) ? $this->config['viewsDir'] : null;
+            $this->di['mailer.view'] = function () use ($viewsDir) {
+                if (!$viewsDir) {
                     throw new \InvalidArgumentException('Invalid views dir!');
                 }
 
                 $view = new SimpleView;
 
-                $view->setViewsDir($this->config['viewsDir']);
+                $view->setViewsDir($viewsDir);
 
                 return $view;
             };
@@ -199,8 +201,8 @@ class MailerService extends Component
         $mailer->setDI($this->di);
 
         if ($this->di->has('queue')) {
-	        $queue = $this->di['queue'];
-	        $queue->choose($this->queueName);
+            $queue = $this->di['queue'];
+            $queue->choose($this->queueName);
             $mailer->setQueue($queue);
         }
     }

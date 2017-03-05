@@ -19,7 +19,7 @@ composer require slowprog/phalcon-mailer
 ```json
 {
   "require": {
-    "slowprog/phalcon-console": "dev-master"
+    "slowprog/phalcon-mailer": "~2.0"
   }
 }
 ```
