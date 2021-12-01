@@ -7,21 +7,17 @@ Phalcon Mailer
 ##Установка
 C помощью `composer`:
 
-Добавить в файл `composer.json` в секцию `require` следующую строку:
+Добавить в файл `composer.json`:
 ```
-"slowprog/phalcon-mailer": "~2.0"
-```
-или выполнить в командной строке:
-```
-composer require slowprog/phalcon-mailer
-```
-Должно получится примерно так:
-```json
-{
-  "require": {
-    "slowprog/phalcon-mailer": "~2.0"
-  }
-}
+    "require": {
+        "slowprog/phalcon-mailer": "4.x-dev"
+    },
+    "repositories": {
+        "slowprog/phalcon-mailer": {
+          "type": "vcs",
+          "url": "git@github.com:dimti/phalcon-mailer.git"
+        }
+    }
 ```
 После этого выполните в терминале команду:
 ```bash
