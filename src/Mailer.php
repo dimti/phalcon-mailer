@@ -3,7 +3,7 @@
 namespace SlowProg\Mailer;
 
 use Closure;
-use Phalcon\DiInterface;
+use Phalcon\Di\DiInterface;
 use Swift_Mailer;
 use Swift_Message;
 use Phalcon\DI\InjectionAwareInterface;
@@ -346,7 +346,7 @@ class Mailer implements InjectionAwareInterface
      *
      * @param mixed $dependencyInjector
      */
-    public function setDI(DiInterface $dependencyInjector)
+    public function setDI(DiInterface $dependencyInjector): void
     {
         $this->di = $dependencyInjector;
     }
@@ -356,7 +356,7 @@ class Mailer implements InjectionAwareInterface
      *
      * @return DiInterface
      */
-    public function getDI()
+    public function getDI(): DiInterface
     {
         return $this->di;
     }

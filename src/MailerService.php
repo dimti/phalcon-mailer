@@ -2,7 +2,7 @@
 
 namespace SlowProg\Mailer;
 
-use Phalcon\Mvc\User\Component;
+use Phalcon\Di\Injectable;
 use Swift_Mailer;
 use Swift_SmtpTransport as SmtpTransport;
 use Swift_MailTransport as MailTransport;
@@ -14,7 +14,7 @@ use Phalcon\Mvc\View\Simple as SimpleView;
  *
  * @package SlowProg\Mailer
  */
-class MailerService extends Component
+class MailerService extends Injectable
 {
     /**
      * @var array

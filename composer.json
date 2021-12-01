@@ -19,7 +19,7 @@
         "swiftmailer/swiftmailer": "~5.3"
     },
     "require-dev": {
-        "phalcon/devtools": "~3.0"
+        "phalcon/devtools": "~4.0"
     },
     "autoload": {
         "psr-4": {
